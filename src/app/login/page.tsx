@@ -23,7 +23,13 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setError("Email ou senha incorretos.");
+      if (error.message === "Email not confirmed") {
+        setError("Você precisa confirmar seu e-mail antes de entrar. Verifique sua caixa de entrada.");
+      } else if (error.message === "Invalid login credentials") {
+        setError("Email ou senha incorretos.");
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
     } else {
       router.push("/dashboard");
