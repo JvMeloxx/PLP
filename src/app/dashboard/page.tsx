@@ -22,6 +22,10 @@ export default function DashboardPage() {
           .eq("id", session.user.id)
           .single();
         
+        if (profile?.role === "admin") {
+          router.replace("/admin");
+          return;
+        }
         setUser(profile);
       }
       setLoading(false);
