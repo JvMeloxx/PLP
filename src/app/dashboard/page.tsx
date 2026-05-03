@@ -61,6 +61,9 @@ export default function DashboardPage() {
   const loadData = useCallback(async () => {
     if (!user) return;
 
+    // 0. Gerar sessões automaticamente para as próximas 4 semanas
+    await supabase.rpc("generate_upcoming_sessions", { weeks_ahead: 4 });
+
     // 1. Buscar matrículas do aluno
     const { data: enrollments } = await supabase
       .from("enrollments")

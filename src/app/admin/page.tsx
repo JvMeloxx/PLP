@@ -56,13 +56,16 @@ export default function AdminPage() {
   };
 
   const loadData = async () => {
+    // Gerar sessões automaticamente para as próximas 4 semanas
+    await supabase.rpc("generate_upcoming_sessions", { weeks_ahead: 4 });
+
     const { data: c } = await supabase.from("classes").select("*").order("day_of_week");
     setClasses(c || []);
 
     const { data: s } = await supabase.from("profiles").select("*").eq("role", "student").order("name");
     setStudents(s || []);
 
-    const { data: sess } = await supabase.from("sessions").select("*, classes(day_of_week, time)").order("date", { ascending: false });
+    const { data: sess } = await supabase.from("sessions").select("*, classes(day_of_week, time, capacity)").order("date", { ascending: false });
     setSessions(sess || []);
 
     const { data: r } = await supabase.from("renewals").select("*, profiles(name)").order("created_at", { ascending: false });
