@@ -309,38 +309,75 @@ export default function AdminPage() {
 
             <div className="grid gap-3">
               {sessions.length === 0 && <p className="text-gray-500 text-sm">Nenhuma aula criada.</p>}
-              {sessions.map((s) => (
+              {sessions.map((s) => {
+                const confirmed = selectedSession === s.id ? attendances.filter((a) => a.status === "confirmed") : [];
+                const waitlisted = selectedSession === s.id ? attendances.filter((a) => a.status === "waitlist") : [];
+                const cancelled = selectedSession === s.id ? attendances.filter((a) => a.status === "cancelled") : [];
+
+                return (
                 <div key={s.id} className="bg-arena-gray rounded-xl p-4 border border-gray-800">
                   <div className="flex justify-between items-center">
                     <div>
                       <h4 className="font-bold">{s.classes?.day_of_week} - {s.classes?.time}</h4>
                       <p className="text-sm text-gray-400">{new Date(s.date + "T12:00:00").toLocaleDateString("pt-BR")}</p>
                     </div>
-                    <button onClick={() => loadAttendances(s.id)} className="bg-gray-700 hover:bg-gray-600 text-white text-sm py-2 px-4 rounded-lg">
-                      Ver Presenças
+                    <button onClick={() => loadAttendances(s.id)} className={`text-white text-sm py-2 px-4 rounded-lg ${selectedSession === s.id ? "bg-arena-red hover:bg-red-600" : "bg-gray-700 hover:bg-gray-600"}`}>
+                      {selectedSession === s.id ? "Ocultar" : "Ver Presenças"}
                     </button>
                   </div>
 
                   {selectedSession === s.id && (
-                    <div className="mt-4 pt-4 border-t border-gray-700">
-                      <h5 className="text-sm font-bold text-gray-300 mb-2">Presenças ({attendances.length})</h5>
-                      {attendances.length === 0 && <p className="text-gray-500 text-xs">Nenhuma presença registrada.</p>}
-                      {attendances.map((a) => (
-                        <div key={a.id} className="flex justify-between items-center py-2 border-b border-gray-800 last:border-0">
-                          <span className="text-sm">{a.profiles?.name}</span>
-                          <span className={`text-xs font-bold px-2 py-1 rounded ${
-                            a.status === "confirmed" ? "bg-green-500/20 text-green-400" :
-                            a.status === "waitlist" ? "bg-yellow-500/20 text-yellow-400" :
-                            "bg-red-500/20 text-red-400"
-                          }`}>
-                            {a.status === "confirmed" ? "Confirmado" : a.status === "waitlist" ? "Espera" : "Cancelou"}
-                          </span>
+                    <div className="mt-4 pt-4 border-t border-gray-700 space-y-4">
+                      {/* Confirmados */}
+                      <div>
+                        <h5 className="text-sm font-bold text-green-400 mb-2 flex items-center gap-2">
+                          ✅ Confirmados ({confirmed.length}/{s.classes?.capacity || "?"})
+                        </h5>
+                        {confirmed.length === 0 && <p className="text-gray-500 text-xs ml-5">Nenhum confirmado.</p>}
+                        {confirmed.map((a, i) => (
+                          <div key={a.id} className="flex justify-between items-center py-2 border-b border-gray-800/50 last:border-0 ml-5">
+                            <span className="text-sm">{i + 1}. {a.profiles?.name}</span>
+                            <span className="text-xs font-bold px-2 py-1 rounded bg-green-500/20 text-green-400">Confirmado</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Lista de Espera */}
+                      {waitlisted.length > 0 && (
+                        <div>
+                          <h5 className="text-sm font-bold text-yellow-400 mb-2 flex items-center gap-2">
+                            ⏳ Lista de Espera ({waitlisted.length})
+                          </h5>
+                          {waitlisted.map((a, i) => (
+                            <div key={a.id} className="flex justify-between items-center py-2 border-b border-gray-800/50 last:border-0 ml-5">
+                              <span className="text-sm">{i + 1}. {a.profiles?.name}</span>
+                              <span className="text-xs font-bold px-2 py-1 rounded bg-yellow-500/20 text-yellow-400">Espera</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
+
+                      {/* Cancelados */}
+                      {cancelled.length > 0 && (
+                        <div>
+                          <h5 className="text-sm font-bold text-red-400 mb-2 flex items-center gap-2">
+                            ❌ Cancelaram ({cancelled.length})
+                          </h5>
+                          {cancelled.map((a) => (
+                            <div key={a.id} className="flex justify-between items-center py-2 border-b border-gray-800/50 last:border-0 ml-5">
+                              <span className="text-sm text-gray-500">{a.profiles?.name}</span>
+                              <span className="text-xs font-bold px-2 py-1 rounded bg-red-500/20 text-red-400">Cancelou</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {attendances.length === 0 && <p className="text-gray-500 text-sm text-center py-2">Nenhuma presença registrada nesta aula.</p>}
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
