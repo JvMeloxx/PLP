@@ -66,6 +66,7 @@ export function ClassList({ classes, onCreateClass, onUpdateClass, onDeleteClass
 
       {editingClass && (
         <ClassForm
+          key={editingClass.id}
           onSubmit={handleEdit}
           onClose={() => setEditingClass(null)}
           editingClass={editingClass}
