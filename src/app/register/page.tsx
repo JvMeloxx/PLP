@@ -25,6 +25,7 @@ export default function RegisterPage() {
       options: {
         data: {
           full_name: name,
+          phone,
         },
       },
     });
@@ -35,15 +36,7 @@ export default function RegisterPage() {
       return;
     }
 
-    // Após registrar com sucesso (como no Supabase, por padrão a sessão loga na hora)
-    // O trigger no DB cria automaticamente o profile, mas não o telefone. Vamos atualizar o telefone.
-    const { data: userData } = await supabase.auth.getUser();
-    if (userData.user) {
-      await supabase
-        .from("profiles")
-        .update({ phone })
-        .eq("id", userData.user.id);
-    }
+    // O trigger no DB agora cuida de salvar o nome e telefone automaticamente.
 
     router.push("/dashboard");
   };

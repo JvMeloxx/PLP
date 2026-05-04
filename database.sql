@@ -87,8 +87,12 @@ CREATE POLICY "Enable insert for authenticated users" ON renewals FOR INSERT WIT
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, name)
-  VALUES (new.id, new.raw_user_meta_data->>'full_name');
+  INSERT INTO public.profiles (id, name, phone)
+  VALUES (
+    new.id, 
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'phone'
+  );
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
