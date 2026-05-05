@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Calendar, Users, ClipboardCheck, CreditCard } from 'lucide-react';
+import { Calendar, Users, ClipboardCheck, CreditCard, Settings } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { TabNav } from '@/components/layout/TabNav';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -13,9 +13,10 @@ import { ClassList } from '@/components/admin/ClassList';
 import { StudentList } from '@/components/admin/StudentList';
 import { SessionList } from '@/components/admin/SessionList';
 import { RenewalList } from '@/components/admin/RenewalList';
+import { SettingsPanel } from '@/components/admin/SettingsPanel';
 import type { Profile, Class, SessionWithClass, Enrollment, Renewal, Attendance, FeedbackMessage } from '@/lib/types';
 
-type TabKey = 'classes' | 'students' | 'sessions' | 'renewals';
+type TabKey = 'classes' | 'students' | 'sessions' | 'renewals' | 'settings';
 
 export default function AdminPage() {
   const [user, setUser] = useState<Profile | null>(null);
@@ -165,6 +166,7 @@ export default function AdminPage() {
     { key: 'students', label: 'Alunos', icon: Users },
     { key: 'sessions', label: 'Aulas', icon: ClipboardCheck },
     { key: 'renewals', label: 'Mensalidades', icon: CreditCard },
+    { key: 'settings', label: 'Ajustes', icon: Settings },
   ];
 
   return (
@@ -175,7 +177,7 @@ export default function AdminPage() {
       <TabNav tabs={tabs} activeTab={activeTab} onTabChange={(k) => setActiveTab(k as TabKey)} />
 
       <main className="max-w-5xl mx-auto p-4 py-8">
-        <StatsCards stats={stats} />
+        {activeTab !== 'settings' && <StatsCards stats={stats} />}
 
         {activeTab === 'classes' && (
           <ClassList 
@@ -208,6 +210,10 @@ export default function AdminPage() {
             renewals={renewals} 
             onUpdateStatus={handleUpdateRenewal} 
           />
+        )}
+
+        {activeTab === 'settings' && (
+          <SettingsPanel />
         )}
       </main>
     </div>

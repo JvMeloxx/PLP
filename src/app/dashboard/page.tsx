@@ -227,13 +227,22 @@ export default function DashboardPage() {
               Gerencie sua agenda e confirme sua presença nas próximas aulas.
             </p>
           </div>
-          <button
-            onClick={() => router.push('/dashboard/renewals')}
-            className="bg-gray-800 hover:bg-gray-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm w-full sm:w-auto"
-          >
-            <CreditCard size={16} className="text-arena-red" />
-            Minhas Mensalidades
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <button
+              onClick={() => router.push('/dashboard/profile')}
+              className="bg-gray-800 hover:bg-gray-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm w-full sm:w-auto"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-arena-red"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Meu Perfil
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/renewals')}
+              className="bg-gray-800 hover:bg-gray-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm w-full sm:w-auto"
+            >
+              <CreditCard size={16} className="text-arena-red" />
+              Minhas Mensalidades
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
