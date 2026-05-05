@@ -8,10 +8,7 @@ export async function cancelAttendanceAction(
   studentId: string, 
   classDay: string, 
   classTime: string
-) {
-  const supabase = createClient();
-
-  // Call the database function to cancel attendance and promote next in line
+  const supabase = await createClient();
   const { data, error } = await supabase.rpc('cancel_attendance', {
     p_session_id: sessionId,
     p_student_id: studentId,
