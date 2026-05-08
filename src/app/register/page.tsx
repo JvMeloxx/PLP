@@ -38,7 +38,7 @@ export default function RegisterPage() {
 
     // O trigger no DB agora cuida de salvar o nome e telefone automaticamente.
 
-    router.push("/dashboard");
+    window.location.href = "/dashboard";
   };
 
   return (
