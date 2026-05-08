@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { loginAction } from "@/app/actions/auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,19 +17,14 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
 
-    if (error) {
-      if (error.message === "Email not confirmed") {
-        setError("Você precisa confirmar seu e-mail antes de entrar. Verifique sua caixa de entrada.");
-      } else if (error.message === "Invalid login credentials") {
-        setError("Email ou senha incorretos.");
-      } else {
-        setError(error.message);
-      }
+    const result = await loginAction(formData);
+
+    if (!result.success) {
+      setError(result.error || "Erro ao fazer login.");
       setLoading(false);
     } else {
       window.location.href = "/dashboard";
