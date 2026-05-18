@@ -29,9 +29,11 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session (important!)
+  // IMPORTANT: Do NOT use getSession() - it reads from the cookie without validation.
+  // getUser() actually contacts the Supabase Auth server to validate the token.
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
