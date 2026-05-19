@@ -50,7 +50,10 @@ export async function loginAction(formData: FormData) {
       } else if (error.message === "Invalid login credentials") {
         return { success: false, error: "Email ou senha incorretos." };
       } else {
-        return { success: false, error: error.message };
+        const msg = error.message && error.message !== '{}' && error.message.trim() !== ''
+          ? error.message
+          : 'Serviço temporariamente indisponível. Aguarde alguns segundos e tente novamente.';
+        return { success: false, error: msg };
       }
     }
 

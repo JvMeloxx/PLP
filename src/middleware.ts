@@ -38,6 +38,16 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // DEBUG: remover depois
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+    console.log('[MIDDLEWARE DEBUG]', {
+      pathname,
+      hasUser: !!user,
+      userError: userError?.message || null,
+      cookies: request.cookies.getAll().map(c => c.name),
+    });
+  }
+
   // Rotas protegidas - redirecionar se não autenticado
   const protectedRoutes = ['/dashboard', '/admin'];
   const isProtected = protectedRoutes.some((route) =>
