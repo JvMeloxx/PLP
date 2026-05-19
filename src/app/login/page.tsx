@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { loginAction } from "@/app/actions/auth";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,16 +17,22 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("password", password);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    const result = await loginAction(formData);
-
-    if (!result.success) {
-      setError(result.error || "Erro ao fazer login.");
+    if (error) {
+      if (error.message === "Email not confirmed") {
+        setError("Você precisa confirmar seu e-mail antes de entrar.");
+      } else if (error.message === "Invalid login credentials") {
+        setError("Email ou senha incorretos.");
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
     } else {
+      // Usar window.location.href garante que os cookies sejam recarregados e enviados pro middleware
       window.location.href = "/dashboard";
     }
   };
