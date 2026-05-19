@@ -95,15 +95,25 @@ export default function DashboardPage() {
 
     const classIds = enrollments.map((e) => e.class_id);
 
-    // 2. Buscar sessões (aulas) das turmas do aluno - apenas de hoje em diante
-    const today = new Date().toISOString().split('T')[0];
+    // 2. Buscar sessões (aulas) das turmas do aluno - apenas da semana atual (até domingo)
+    const todayObj = new Date();
+    const day = todayObj.getDay(); // 0 é Domingo, 1 é Segunda
+    const diff = day === 0 ? 0 : 7 - day; // Dias até o próximo domingo
+    
+    const endOfWeekObj = new Date(todayObj);
+    endOfWeekObj.setDate(todayObj.getDate() + diff);
+    
+    const today = todayObj.toISOString().split('T')[0];
+    const endOfWeek = endOfWeekObj.toISOString().split('T')[0];
+
     const { data: sessionsData } = await supabase
       .from('sessions')
       .select('*, classes(day_of_week, time, capacity)')
       .in('class_id', classIds)
       .gte('date', today)
+      .lte('date', endOfWeek) // Filtra até o final da semana atual
       .order('date', { ascending: true })
-      .limit(10);
+      .limit(20);
 
     setSessions((sessionsData as unknown as SessionWithClass[]) || []);
 
