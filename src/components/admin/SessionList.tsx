@@ -63,7 +63,16 @@ export function SessionList({ sessions, onLoadAttendances }: SessionListProps) {
   };
 
   const filteredSessions = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayObj = new Date();
+    
+    const formatLocal = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const todayStr = formatLocal(todayObj);
     
     return sessions.filter(s => {
       if (dateFilter === 'all') return true;
@@ -71,12 +80,11 @@ export function SessionList({ sessions, onLoadAttendances }: SessionListProps) {
       if (dateFilter === 'upcoming') return s.date > todayStr;
       if (dateFilter === 'past') return s.date < todayStr;
       if (dateFilter === 'this_week') {
-        const todayObj = new Date();
-        const day = todayObj.getDay(); 
-        const diff = day === 0 ? 0 : 7 - day; 
+        const currentDay = todayObj.getDay(); 
+        const diff = currentDay === 0 ? 0 : 7 - currentDay; 
         const endOfWeekObj = new Date(todayObj);
         endOfWeekObj.setDate(todayObj.getDate() + diff);
-        const endOfWeekStr = endOfWeekObj.toISOString().split('T')[0];
+        const endOfWeekStr = formatLocal(endOfWeekObj);
         return s.date >= todayStr && s.date <= endOfWeekStr;
       }
       return true;

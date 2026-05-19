@@ -90,14 +90,21 @@ export default function DashboardPage() {
     const classIds = enrollments.map((e) => e.class_id);
 
     const todayObj = new Date();
-    const day = todayObj.getDay(); 
-    const diff = day === 0 ? 0 : 7 - day; 
+    const currentDay = todayObj.getDay(); 
+    const diff = currentDay === 0 ? 0 : 7 - currentDay; 
     
     const endOfWeekObj = new Date(todayObj);
     endOfWeekObj.setDate(todayObj.getDate() + diff);
     
-    const today = todayObj.toISOString().split('T')[0];
-    const endOfWeek = endOfWeekObj.toISOString().split('T')[0];
+    const formatLocal = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const today = formatLocal(todayObj);
+    const endOfWeek = formatLocal(endOfWeekObj);
 
     const { data: sessionsData } = await supabase
       .from('sessions')
