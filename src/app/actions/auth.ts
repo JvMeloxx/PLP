@@ -31,9 +31,17 @@ export async function loginAction(formData: FormData) {
             return cookieStore.getAll();
           },
           setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
+            console.log('[LOGIN ACTION DEBUG] Setting cookies:', cookiesToSet.map(c => c.name));
+            cookiesToSet.forEach(({ name, value, options }) => {
+              console.log(`[LOGIN ACTION DEBUG] Setting cookie ${name} with options:`, options);
+              // Forçar algumas opções para garantir compatibilidade no Railway
+              cookieStore.set(name, value, { 
+                ...options,
+                secure: process.env.NODE_ENV === 'production' || true,
+                sameSite: 'lax',
+                path: '/'
+              });
+            });
           },
         },
       }
