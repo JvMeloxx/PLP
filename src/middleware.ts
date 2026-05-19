@@ -37,10 +37,28 @@ export async function middleware(request: NextRequest) {
     error: userError,
   } = await supabase.auth.getSession();
   
-  const user = session?.user;
+  let user = session?.user;
+
+  // FALLBACK MANUAL: Se o getSession falhar devido a erro de formato de chunk do @supabase/ssr
+  // mas o cookie com o JSON existir, vamos extrair o usuário na marra para não bloquear o login!
+  if (!user) {
+    const rawCookie = request.cookies.get(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1].split('.')[0]}-auth-token`);
+    if (rawCookie && rawCookie.value.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(rawCookie.value);
+        if (parsed?.user) {
+          user = parsed.user;
+          console.log('[MIDDLEWARE DEBUG] Usuário recuperado no Fallback Manual!');
+        }
+      } catch (e) {
+        console.error('[MIDDLEWARE DEBUG] Falha no Fallback Manual:', e);
+      }
+    }
+  }
+
   console.log('[MIDDLEWARE DEBUG] URL Configurada no Servidor:', process.env.NEXT_PUBLIC_SUPABASE_URL);
   console.log('[MIDDLEWARE DEBUG] Cookies recebidos do navegador:', request.cookies.getAll().map(c => `${c.name}=${c.value.substring(0, 20)}...`));
-  console.log('[MIDDLEWARE DEBUG] getSession() finalizado. User:', !!user, 'Error:', userError?.message);
+  console.log('[MIDDLEWARE DEBUG] Sessão finalizada. User válido?:', !!user);
 
   const pathname = request.nextUrl.pathname;
 
