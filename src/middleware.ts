@@ -38,18 +38,14 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession();
   
   const user = session?.user;
+  console.log('[MIDDLEWARE DEBUG] URL Configurada no Servidor:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log('[MIDDLEWARE DEBUG] Cookies recebidos do navegador:', request.cookies.getAll().map(c => c.name));
   console.log('[MIDDLEWARE DEBUG] getSession() finalizado. User:', !!user, 'Error:', userError?.message);
 
   const pathname = request.nextUrl.pathname;
 
   // DEBUG: remover depois
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
-    console.log('[MIDDLEWARE DEBUG]', {
-      pathname,
-      hasUser: !!user,
-      userError: userError?.message || null,
-      cookies: request.cookies.getAll().map(c => c.name),
-    });
   }
 
   // Rotas protegidas - redirecionar se não autenticado
