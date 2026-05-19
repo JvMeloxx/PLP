@@ -29,12 +29,16 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // IMPORTANT: Do NOT use getSession() - it reads from the cookie without validation.
-  // getUser() actually contacts the Supabase Auth server to validate the token.
+  // Temporariamente usando getSession() para contornar o problema de rede (hang) no Railway.
+  // getSession() valida o JWT localmente sem fazer requisição HTTP para o Supabase.
+  console.log('[MIDDLEWARE DEBUG] Iniciando getSession()...');
   const {
-    data: { user },
+    data: { session },
     error: userError,
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getSession();
+  
+  const user = session?.user;
+  console.log('[MIDDLEWARE DEBUG] getSession() finalizado. User:', !!user, 'Error:', userError?.message);
 
   const pathname = request.nextUrl.pathname;
 
