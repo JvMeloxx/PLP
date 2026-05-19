@@ -64,12 +64,15 @@ export default function ProfilePage() {
 
     try {
       // 1. Update Profile (Name, Phone)
-      const { error: profileError } = await supabase
+      const { data: updatedProfile, error: profileError } = await supabase
         .from('profiles')
         .update({ name, phone })
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .select()
+        .single();
 
       if (profileError) throw profileError;
+      if (!updatedProfile) throw new Error('Não foi possível salvar. Problema de permissão no banco.');
 
       // 2. Update Password if provided
       if (password) {

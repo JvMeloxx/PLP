@@ -12,13 +12,13 @@ interface SessionListProps {
   onLoadAttendances: (sessionId: string) => Promise<Attendance[]>;
 }
 
-type DateFilter = 'all' | 'today' | 'upcoming' | 'past';
+type DateFilter = 'all' | 'today' | 'upcoming' | 'past' | 'this_week';
 
 export function SessionList({ sessions, onLoadAttendances }: SessionListProps) {
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('this_week');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const handleToggle = async (sessionId: string) => {
@@ -70,6 +70,15 @@ export function SessionList({ sessions, onLoadAttendances }: SessionListProps) {
       if (dateFilter === 'today') return s.date === todayStr;
       if (dateFilter === 'upcoming') return s.date > todayStr;
       if (dateFilter === 'past') return s.date < todayStr;
+      if (dateFilter === 'this_week') {
+        const todayObj = new Date();
+        const day = todayObj.getDay(); 
+        const diff = day === 0 ? 0 : 7 - day; 
+        const endOfWeekObj = new Date(todayObj);
+        endOfWeekObj.setDate(todayObj.getDate() + diff);
+        const endOfWeekStr = endOfWeekObj.toISOString().split('T')[0];
+        return s.date >= todayStr && s.date <= endOfWeekStr;
+      }
       return true;
     });
   }, [sessions, dateFilter]);
@@ -88,9 +97,10 @@ export function SessionList({ sessions, onLoadAttendances }: SessionListProps) {
           onChange={(e) => setDateFilter(e.target.value as DateFilter)}
           className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-arena-red focus:border-arena-red block p-2.5"
         >
-          <option value="all">Todas as Aulas</option>
+          <option value="this_week">Aulas Dessa Semana</option>
           <option value="today">Aulas de Hoje</option>
           <option value="upcoming">Próximos Dias</option>
+          <option value="all">Todas as Aulas</option>
           <option value="past">Aulas Passadas</option>
         </select>
       </div>
