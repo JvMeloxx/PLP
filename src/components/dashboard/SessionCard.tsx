@@ -9,6 +9,7 @@ import type { SessionWithClass, Attendance } from '@/lib/types';
 interface SessionCardProps {
   session: SessionWithClass;
   attendance?: Attendance;
+  waitlistPosition?: number;
   confirmedCount: number;
   isLoading: boolean;
   onConfirm: () => void;
@@ -42,6 +43,7 @@ function formatDate(dateStr: string) {
 export function SessionCard({
   session,
   attendance,
+  waitlistPosition,
   confirmedCount,
   isLoading,
   onConfirm,
@@ -110,7 +112,7 @@ export function SessionCard({
             <div className="flex items-center gap-1.5 mt-2">
               <Clock size={14} className="text-yellow-400" />
               <span className="text-sm font-bold text-yellow-400">
-                Na lista de espera
+                {waitlistPosition ? `Você é o ${waitlistPosition}º da lista de espera` : 'Na lista de espera'}
               </span>
             </div>
           )}

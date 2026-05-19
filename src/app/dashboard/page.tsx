@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [sessions, setSessions] = useState<SessionWithClass[]>([]);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [sessionCounts, setSessionCounts] = useState<Record<string, number>>({});
+  const [waitlistPositions, setWaitlistPositions] = useState<Record<string, number>>({});
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
   const [historyAttendances, setHistoryAttendances] = useState<(Attendance & { sessions?: SessionWithClass })[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -63,10 +64,7 @@ export default function DashboardPage() {
       .order('created_at', { ascending: false })
       .limit(20);
 
-    // Filter out rows where sessions is null (due to inner join behavior or invalid data)
     const validHistory = (data || []).filter(a => a.sessions) as any;
-    
-    // Sort by session date descending
     validHistory.sort((a: any, b: any) => new Date(b.sessions.date).getTime() - new Date(a.sessions.date).getTime());
     
     setHistoryAttendances(validHistory);
@@ -76,13 +74,9 @@ export default function DashboardPage() {
   const loadData = useCallback(async () => {
     if (!user) return;
 
-    // 0. Gerar sessões automaticamente para as próximas 4 semanas
     await supabase.rpc('generate_upcoming_sessions', { weeks_ahead: 4 });
-
-    // Load history asynchronously
     loadHistory(user.id);
 
-    // 1. Buscar matrículas do aluno
     const { data: enrollments } = await supabase
       .from('enrollments')
       .select('class_id')
@@ -95,10 +89,9 @@ export default function DashboardPage() {
 
     const classIds = enrollments.map((e) => e.class_id);
 
-    // 2. Buscar sessões (aulas) das turmas do aluno - apenas da semana atual (até domingo)
     const todayObj = new Date();
-    const day = todayObj.getDay(); // 0 é Domingo, 1 é Segunda
-    const diff = day === 0 ? 0 : 7 - day; // Dias até o próximo domingo
+    const day = todayObj.getDay(); 
+    const diff = day === 0 ? 0 : 7 - day; 
     
     const endOfWeekObj = new Date(todayObj);
     endOfWeekObj.setDate(todayObj.getDate() + diff);
@@ -111,13 +104,12 @@ export default function DashboardPage() {
       .select('*, classes(day_of_week, time, capacity)')
       .in('class_id', classIds)
       .gte('date', today)
-      .lte('date', endOfWeek) // Filtra até o final da semana atual
+      .lte('date', endOfWeek)
       .order('date', { ascending: true })
       .limit(20);
 
     setSessions((sessionsData as unknown as SessionWithClass[]) || []);
 
-    // 3. Buscar presenças do aluno nessas sessões
     if (sessionsData && sessionsData.length > 0) {
       const sessionIds = sessionsData.map((s) => s.id);
 
@@ -127,9 +119,9 @@ export default function DashboardPage() {
         .eq('student_id', user.id)
         .in('session_id', sessionIds);
 
-      setAttendances((myAttendances as Attendance[]) || []);
+      const loadedAttendances = (myAttendances as Attendance[]) || [];
+      setAttendances(loadedAttendances);
 
-      // 4. Buscar contagem de confirmados por sessão
       const counts: Record<string, number> = {};
       for (const sid of sessionIds) {
         const { count } = await supabase
@@ -140,6 +132,19 @@ export default function DashboardPage() {
         counts[sid] = count || 0;
       }
       setSessionCounts(counts);
+
+      // Buscar posição na lista de espera
+      const waitlistPos: Record<string, number> = {};
+      for (const att of loadedAttendances) {
+        if (att.status === 'waitlist') {
+          const { data } = await supabase.rpc('get_waitlist_position', {
+            p_session_id: att.session_id,
+            p_student_id: user.id
+          });
+          if (data) waitlistPos[att.session_id] = data;
+        }
+      }
+      setWaitlistPositions(waitlistPos);
     }
   }, [user, loadHistory]);
 
@@ -282,6 +287,7 @@ export default function DashboardPage() {
                     key={session.id}
                     session={session}
                     attendance={attendances.find((a) => a.session_id === session.id)}
+                    waitlistPosition={waitlistPositions[session.id]}
                     confirmedCount={sessionCounts[session.id] || 0}
                     isLoading={actionLoading === session.id}
                     onConfirm={() => confirmAttendance(session)}
