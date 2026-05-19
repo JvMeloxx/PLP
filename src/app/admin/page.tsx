@@ -207,7 +207,9 @@ export default function AdminPage() {
 
         {activeTab === 'renewals' && (
           <RenewalList 
-            renewals={renewals} 
+            renewals={renewals}
+            students={students}
+            enrollments={enrollments} 
             onUpdateStatus={handleUpdateRenewal} 
           />
         )}
