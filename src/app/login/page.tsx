@@ -32,8 +32,10 @@ export default function LoginPage() {
       }
       setLoading(false);
     } else {
-      // Usar window.location.href garante que os cookies sejam recarregados e enviados pro middleware
-      window.location.href = "/dashboard";
+      // Usar router.push em vez de window.location para evitar race condition
+      // onde a página recarrega antes do Supabase terminar de gravar o cookie.
+      router.push("/dashboard");
+      router.refresh();
     }
   };
 
