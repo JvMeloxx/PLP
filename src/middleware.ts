@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
   
   const user = session?.user;
   console.log('[MIDDLEWARE DEBUG] URL Configurada no Servidor:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-  console.log('[MIDDLEWARE DEBUG] Cookies recebidos do navegador:', request.cookies.getAll().map(c => c.name));
+  console.log('[MIDDLEWARE DEBUG] Cookies recebidos do navegador:', request.cookies.getAll().map(c => `${c.name}=${c.value.substring(0, 20)}...`));
   console.log('[MIDDLEWARE DEBUG] getSession() finalizado. User:', !!user, 'Error:', userError?.message);
 
   const pathname = request.nextUrl.pathname;
