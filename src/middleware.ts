@@ -86,21 +86,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Proteção do admin: verificar role no banco
-  if (pathname.startsWith('/admin') && user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile || profile.role !== 'admin') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/dashboard';
-      return NextResponse.redirect(url);
-    }
-  }
-
+  // A proteção da rota /admin será feita puramente no client-side (admin/page.tsx)
+  // e pelo RLS do banco de dados, para evitar que o Railway dê hang fazendo
+  // requisições server-to-server para o Supabase.
+  
   return supabaseResponse;
 }
 
