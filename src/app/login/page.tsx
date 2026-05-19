@@ -32,10 +32,10 @@ export default function LoginPage() {
       }
       setLoading(false);
     } else {
-      // Usar router.push em vez de window.location para evitar race condition
-      // onde a página recarrega antes do Supabase terminar de gravar o cookie.
-      router.push("/dashboard");
-      router.refresh();
+      // Pequeno delay para garantir que o cookie foi salvo antes de navegar
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 500);
     }
   };
 
